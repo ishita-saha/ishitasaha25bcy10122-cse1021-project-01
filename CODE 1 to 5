@@ -1,0 +1,240 @@
+PYTHON PROGRAMS
+#Q1. Write a function factorial(n) that calculates the factorial of a non-negative integer n (n!).
+
+#CODE:
+import time
+import sys
+var=1
+def factorial(n):
+    
+    if n < 0:
+        return "Factorial does not exist for negative numbers."
+        start_time = time.time()
+    else:
+        fact = 1
+        for i in range(1, n + 1):
+            fact = fact*i
+        return fact
+num = int(input("Enter a number:"))
+print(factorial(num))
+end_time = time.time()
+print("-" * 30)
+print(f"Execution Time: {end_time - start_time:.6f} seconds")
+print(f"Memory utilization:{sys.getsizeof(l1)} bytes")
+
+#OUTPUT:
+Enter a number:6
+720
+
+
+
+#Q2. Write a function is_palindrome(n) that checks if a number reads the same forwards and backwards.
+
+#CODE:
+import time
+import sys
+
+var=1
+
+start_time=time.time()
+def is_palindrome(n):
+    s=str(n)
+    return s==s[::-1]
+
+n=int(input("Enter the number:"))        
+print(is_palindrome(n))
+
+end_time=time.time()
+execution_time=end_time-start_time
+
+print("Execution time:",execution_time)
+print(sys.getsizeof(var))
+
+OUTPUT:
+Enter the number:121
+True
+Execution time: 0.6117184162139893
+28
+
+
+
+
+#Q3. Write a function mean_of_digits(n) that returns the average of all digits in a number.
+
+#CODE:
+import time
+import sys
+
+def mean_of_digits(n: int) -> float:
+    num = abs(n)
+
+    if num == 0:
+        return 0.0
+
+    total_sum = 0
+    count = 0
+    while num > 0:
+        digit = num % 10
+        total_sum += digit
+        count += 1
+        num //= 10
+
+    return total_sum / count
+
+print("Welcome to the Digit Mean Calculator!")
+
+try:
+    user_input = input("Enter a whole number: ")
+    number = int(user_input)
+ 
+    start_time = time.time()
+    result = mean_of_digits(number)
+    end_time = time.time()
+    
+    print(f"\nThe number: {number}")
+    print(f"The mean of the digits is: {result:.2f}")
+
+    print("-" * 30)
+    print(f"Execution Time: {end_time - start_time:.6f} seconds")
+
+    print(f"Memory utilization: {sys.getsizeof(result)} bytes")
+
+except ValueError:
+    print("\nSorry, that wasn't a valid whole number. Please enter only digits.")
+
+#OUTPUT:
+Welcome to the Digit Mean Calculator!
+Enter a whole number: 15
+
+The number: 15
+The mean of the digits is: 3.00
+------------------------------
+Execution Time: 0.000013 seconds
+Memory utilization: 24 bytes
+
+
+
+#Q4. Write a function digital_root(n) that repeatedly sums the digits of a number until a single digit is obtained.
+
+#CODE:
+import time
+import sys
+
+def digital_root_formula(n):
+  
+  if n < 0:
+    raise ValueError("Digital root is typically defined for non-negative integers.")
+  if n == 0:
+    return 0
+  else:
+    
+    return 1 + (n - 1) % 9
+
+# --- Input Handling and Execution ---
+
+try:
+  
+  n = int(input("Enter the non-negative integer: "))
+  
+  
+  if n < 0:
+    print("Error: Please enter a non-negative integer.")
+  else:
+    start_time_formula = time.time()
+    result_formula = digital_root_formula(n)
+    end_time_formula = time.time()
+    execution_time_formula = end_time_formula - start_time_formula
+    
+    print("\n-------------------------")
+    print(f"Input Number: {n}")
+    print(f"Result (Formula): {result_formula}")
+    print(f"Formula Execution time: {execution_time_formula:.9f} seconds")
+    print("-------------------------")
+    
+except ValueError:
+  print("Error: Invalid input. Please enter a valid integer.")
+
+#OUTPUT:
+Enter the non-negative integer: 15
+-------------------------
+Input Number: 15
+Result (Formula): 6
+Formula Execution time: 0.000006437 seconds
+
+
+
+#Q5. Write a function is_abundant(n) that returns True if the sum of proper divisors of n is greater than n.
+
+#CODE:
+import time
+import sys
+import math
+
+def is_abundant(n):
+  
+  if n <= 0:
+    
+    return False
+  if n == 1:
+    
+    return False
+    
+  sum_of_proper_divisors = 1 
+  
+  
+  limit = int(math.sqrt(n))
+  
+  for i in range(2, limit + 1):
+    if n % i == 0:
+      # i is a divisor.
+      sum_of_proper_divisors += i
+      
+      
+      if i * i != n:
+        sum_of_proper_divisors += n // i
+
+  
+  return sum_of_proper_divisors > n
+
+# --- Execution and Benchmarking ---
+
+try:
+  
+  n = int(input("Enter a positive integer to check for abundance: "))
+
+  
+  start_time = time.time()
+  
+  
+  result = is_abundant(n)
+  
+  
+  end_time = time.time()
+  
+  execution_time = end_time - start_time
+  
+  
+  print("\n------------------------------------")
+  print(f"Number checked (n): {n}")
+  print(f"Is {n} Abundant? **{result}**")
+  print(f"Execution Time (Optimized): {execution_time:.6f} seconds")
+  print("------------------------------------")
+
+except ValueError:
+  print("Error: Invalid input. Please enter a valid integer.")
+except Exception as e:
+  
+  print(f"An error occurred: {e}")
+
+#OUTPUT:
+Enter a positive integer to check for abundance: 15
+
+------------------------------------
+Number checked (n): 15
+Is 15 Abundant? **False**
+Execution Time (Optimized): 0.000015 seconds
+
+
+
+
+
