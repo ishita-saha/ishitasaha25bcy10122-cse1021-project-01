@@ -1,0 +1,435 @@
+#Q31. Implement the probabilistic Miller-Rabin test is_prime_miller_rabin(n, k) with k rounds.
+
+#CODE:
+import time
+import sys
+
+def modular_exponentiation(base, exponent, modulus):
+    
+    if modulus == 1:
+        return 0
+    base %= modulus
+    result = 1
+    
+    while exponent > 0:
+        if exponent % 2 == 1:
+            result = (result * base) % modulus
+        
+        base = (base * base) % modulus
+        
+        exponent //= 2
+        
+    return result
+
+DETERMINISTIC_BASES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+
+def is_prime_miller_rabin(n: int, k: int = 5) -> bool:
+ 
+    if not isinstance(n, int):
+        raise TypeError("n must be an integer.")
+        
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0:
+        return False
+
+    r, d = 0, n - 1
+    while d % 2 == 0:
+        r += 1
+        d //= 2
+    
+    bases_to_check = DETERMINISTIC_BASES[:k]
+    
+    for a in bases_to_check:
+        if a >= n - 1:
+            break 
+            
+        x = modular_exponentiation(a, d, n)
+        
+        if x == 1 or x == n - 1:
+            continue
+            
+        is_strong_pseudoprime = False
+        for _ in range(r - 1):
+            # Compute x = x^2 mod n
+            x = modular_exponentiation(x, 2, n)
+            
+            if x == n - 1:
+                # Found the strong pseudoprime condition
+                is_strong_pseudoprime = True
+                break
+        
+        if not is_strong_pseudoprime:
+            # If the loop finished without finding n-1, n is definitely composite
+            return False
+            
+    return True
+
+# --- Example Usage and Performance Measurement ---
+
+if __name__ == "__main__":
+    # Test numbers include known primes, composites, and a large prime.
+    test_numbers = [2, 7999983, 1000000007]
+    k_bases = 10
+    
+    print("--- Miller-Rabin Primality Checker (Custom Implementation) ---")
+    print(f"Testing with k={k_bases} deterministic bases: {DETERMINISTIC_BASES[:k_bases]}")
+    
+    print("\n[Test Results]")
+    total_time_ms = 0
+    total_memory_bytes = 0
+    
+    for num in test_numbers:
+        # Start Timer
+        start_time = time.perf_counter()
+        
+        try:
+            is_prime = is_prime_miller_rabin(num, k=k_bases)
+        except TypeError as e:
+            print(f"  {num} -> Error: {e}")
+            continue
+            
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        memory_usage_bytes = sys.getsizeof(is_prime) # Size of the boolean result
+        
+        total_time_ms += elapsed_time
+        total_memory_bytes += memory_usage_bytes
+        
+        result_str = "Likely Prime" if is_prime else "Composite"
+        
+        print(f"  {num}: {result_str} (Time: {elapsed_time:.6f} ms)")
+
+    avg_time_ms = total_time_ms / len(test_numbers)
+    
+    print("\n[Performance Metrics Summary]")
+    print(f"Total numbers tested: {len(test_numbers)}")
+    print(f"Average time per check: {avg_time_ms:.6f} milliseconds")
+    print(f"Approximate memory for result object (per case): {total_memory_bytes / len(test_numbers):.0f} bytes")
+
+#OUTPUT:
+--- Miller-Rabin Primality Checker (Custom Implementation) ---
+Testing with k=10 deterministic bases: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+
+[Test Results]
+  2: Likely Prime (Time: 0.003900 ms)
+  7: Likely Prime (Time: 0.030500 ms)
+  999983: Likely Prime (Time: 0.045500 ms)
+  1000000007: Likely Prime (Time: 0.059400 ms)
+
+[Performance Metrics Summary]
+Total numbers tested: 4
+Average time per check: 0.034825 milliseconds
+Approximate memory for result object (per case): 28 bytes
+
+
+
+#Q32. Implement pollard_rho(n) for integer factorization using Pollard's rho algorithm.
+#CODE:
+import time
+import sys
+
+def gcd(a, b):
+    
+    a = abs(a)
+    b = abs(b)
+    
+    if a < 0: a = -a
+    if b < 0: b = -b
+    
+    while b:
+        a, b = b, a % b
+    return a
+
+def is_prime_simple(n):
+    
+    if n <= 1: return False
+    if n <= 3: return True
+    if n % 2 == 0 or n % 3 == 0: return False
+    
+    i = 5
+    while i * i <= n and i < 20: 
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+        
+    
+    return True
+
+def pollard_rho(n):
+    
+    if n <= 1: return None
+    if n % 2 == 0: return 2
+    if is_prime_simple(n): return n # Skip for probable primes
+    
+    x = 2
+    y = 2
+    c = 1 # The constant for the polynomial f(x) = (x^2 + c) mod n
+    d = 1 # Greatest Common Divisor
+    
+    
+    max_restarts = 5
+    for restart_count in range(max_restarts):
+        x = restart_count + 2 # Different start point
+        y = x
+        c = restart_count + 1 # Different constant
+        d = 1
+        limit = 100000 # Safety limit for iterations
+        
+        for i in range(1, limit):
+            x = (x * x + c) % n
+            
+            y = (y * y + c) % n
+            y = (y * y + c) % n
+            
+            diff = x - y
+            if diff < 0:
+                diff = -diff # Manual abs
+            
+            d = gcd(diff, n)
+            
+            if d > 1:
+                if d == n:
+                    break
+                else:
+                    return d
+        
+        if d > 1 and d < n:
+            return d
+
+    return n
+
+
+if __name__ == "__main__":
+    
+
+    test_numbers = [91, 10403, 863, 29017]
+    
+    print("--- Pollard's Rho Factorization ---")
+
+    for number in test_numbers:
+        
+        start_time = time.perf_counter()
+        
+        start_mem_size = sys.getsizeof(number) 
+
+        factor = pollard_rho(number)
+
+        end_time = time.perf_counter()
+        end_mem_size = sys.getsizeof(number)
+        
+        print("-" * 50)
+        print(f"Factoring N = {number}")
+        
+        if factor is None:
+            result_msg = "Cannot factor (Input <= 1)."
+        elif factor == number:
+            result_msg = f"No non-trivial factor found (N is likely prime: {number})."
+        else:
+            other_factor = number // factor
+            result_msg = f"Factor found: {factor}. Other factor: {other_factor}."
+        
+        print(f"Result: {result_msg}")
+        
+    
+        execution_time_ms = (end_time - start_time) * 1000
+        memory_used_bytes = end_mem_size - start_mem_size
+        
+        print(f"Execution Time: {execution_time_ms:.6f} milliseconds")
+        print(f"Memory Overhead (sys.getsizeof difference): {memory_used_bytes} bytes")
+        
+    print("-" * 50)
+
+#OUTPUT:
+--- Pollard's Rho Factorization ---
+--------------------------------------------------
+Factoring N = 91
+Result: Factor found: 7. Other factor: 13.
+Execution Time: 0.024100 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+--------------------------------------------------
+Factoring N = 10403
+Result: No non-trivial factor found (N is likely prime: 10403).
+Execution Time: 0.015100 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+--------------------------------------------------
+Factoring N = 863
+Result: No non-trivial factor found (N is likely prime: 863).
+Execution Time: 0.015800 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+--------------------------------------------------
+Factoring N = 29017
+Result: No non-trivial factor found (N is likely prime: 29017).
+Execution Time: 0.011700 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+
+
+
+#Q33. Write a function zeta_approx(s, terms) that approximates the Riemann zeta function ζ(s) using the first 'terms' of the series.
+
+#CODE:
+import time
+import sys
+
+def integer_power(base, exponent):
+    
+    if exponent == 0:
+        return 1.0
+    
+    result = 1.0
+    float_base = float(base) 
+    
+    for _ in range(exponent):
+        result *= float_base
+    return result
+
+def zeta_approx(s, terms):
+    
+    if not isinstance(s, int) or not isinstance(terms, int):
+        raise TypeError("s and terms must be integers for this constrained implementation.")
+    if s <= 1:
+        raise ValueError("s must be greater than 1 for series convergence.")
+    if terms <= 0:
+        return 0.0
+
+    zeta_sum = 0.0
+    for n in range(1, terms + 1):
+        n_to_s = integer_power(n, s)
+        
+        term = 1.0 / n_to_s
+        
+        zeta_sum += term
+        
+    return zeta_sum
+
+if __name__ == "__main__":
+    S = 2
+    TERMS = 10000 
+    
+    print("--- Riemann Zeta Approximation ---")
+    
+    try:
+        start_time = time.perf_counter()
+        
+        approximation = zeta_approx(s=S, terms=TERMS)
+        
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        memory_usage_bytes = sys.getsizeof(approximation) # Size of the float result
+        
+        print(f"\n[Result: ζ({S}) Approximation]")
+        print(f"Terms summed (n): {TERMS}")
+        print(f"Approximated value: {approximation:.10f}")
+        
+        print("\n[Performance Metrics]")
+        print(f"Time taken: {elapsed_time:.6f} milliseconds")
+        print(f"Memory allocated for result (approx.): {memory_usage_bytes} bytes")
+
+    except (TypeError, ValueError) as e:
+        print("\n[Error]")
+        print(e)
+
+#OUTPUT:
+--- Riemann Zeta Approximation ---
+
+[Result: ζ(2) Approximation]
+Terms summed (n): 10000
+Approximated value: 1.6448340718
+
+[Performance Metrics]
+Time taken: 3.149200 milliseconds
+Memory allocated for result (approx.): 24 bytes
+
+
+
+#Q34. Write a function Partition Function p(n) partition_function(n) that calculates the number of distinct ways to write n as a sum of positive integers.
+
+#CODE:
+import time
+import sys
+
+def partition_function(n):
+    
+    if not isinstance(n, int) or n < 0:
+        raise ValueError("n must be a non-negative integer.")
+
+    if n == 0:
+        return 1
+    
+    dp = [0] * (n + 1)
+    dp[0] = 1 # p(0) = 1 (empty partition)
+
+    g_k_list = []
+    k = 1
+    while True:
+        g_k = k * (3 * k - 1) // 2
+        g_minus_k = k * (3 * k + 1) // 2
+        
+        if g_k <= n:
+            g_k_list.append(g_k)
+        if g_minus_k <= n:
+            g_k_list.append(g_minus_k)
+        
+        if g_k > n and g_minus_k > n:
+            break
+        
+        k += 1
+
+    for i in range(1, n + 1):
+        sign_index = 0 # Used to track the sign (+1, +1, -1, -1, +1, +1, ...)
+        current_sum = 0
+        
+        for g_k in g_k_list:
+            if i - g_k < 0:
+                break # All subsequent g_k will be too large
+            
+            sign = 1 if (sign_index % 4 < 2) else -1
+            
+            current_sum += sign * dp[i - g_k]
+            
+            sign_index += 1
+            
+        dp[i] = current_sum
+
+    return dp[n]
+
+
+if __name__ == "__main__":
+    N_TO_CALCULATE = 100 
+    
+    print("--- Integer Partition Function p(n) Calculator ---")
+    
+    try:
+        start_time = time.perf_counter()
+        
+        result_p_n = partition_function(N_TO_CALCULATE)
+        
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        memory_usage_bytes = sys.getsizeof(result_p_n) # Size of the integer result
+        
+        print(f"\n[Result: p({N_TO_CALCULATE})]")
+        print(f"The number of partitions is: {result_p_n}")
+        
+        print("\n[Performance Metrics]")
+        print(f"Time taken: {elapsed_time:.6f} milliseconds")
+        print(f"Memory allocated for result (approx.): {memory_usage_bytes} bytes")
+
+    except (TypeError, ValueError) as e:
+        print("\n[Error]")
+        print(e)
+
+#OUTPUT:
+--- Integer Partition Function p(n) Calculator ---
+
+[Result: p(100)]
+The number of partitions is: 190569292
+
+[Performance Metrics]
+Time taken: 0.189700 milliseconds
+Memory allocated for result (approx.): 28 bytes
