@@ -1,0 +1,162 @@
+#Q6. Write a function is_deficient(n) that returns True if the sum of proper divisors of n is less than n.
+#CODE:
+import time
+import sys
+var=1
+start_time=time.time()
+
+def is_deficient(x):
+    if x<= 0:
+        print(False)
+        return
+    
+    sum_of_divisors = 0
+    for i in range(1,x):
+        if x%i == 0:
+            sum_of_divisors+= i
+    
+    if sum_of_divisors<x:
+        print(True)  
+    else:
+        print(False)  
+is_deficient(6)
+is_deficient(4)  # 1,2   1+2=3, where 4>3(true is printed)
+
+end_time=time.time()
+execution_time=end_time-start_time
+print("Execution time:", execution_time)
+print(sys.getsizeof(var))
+
+#OUTPUT:
+False
+True
+Execution time: 0.03604912757873535
+28
+
+
+
+#Q7. Write a function for harshad number is_harshad(n) that checks if a number is divisible by the sum of its digits. 
+
+#CODE:
+import time
+import sys
+var=1
+start_time=time.time()
+
+def is_harshad(n):
+    # Calculate sum of digits
+    digit_sum = 0
+    temp = n
+    while temp > 0:
+        digit_sum += temp % 10
+        temp //= 10
+    
+    # Check divisibility by digit sum
+    return n % digit_sum == 0
+
+n=int(input("Enter number:"))
+
+end_time=time.time()
+execution_time=end_time-start_time
+print("Execution time:", execution_time)
+print(sys.getsizeof(var))
+
+#OUTPUT:
+Enter number:56
+Execution time: 1.5987322330474854
+28
+
+
+
+#Q8. Write a function is_automorphic(n) that checks if a number's square ends with the number itself.
+
+#CODE:
+import time
+import sys
+var=1
+start_time=time.time()
+
+def is_automorphic(n):
+    square = n * n
+    return str(square).endswith(str(n))
+
+num = int(input("Enter a number: "))
+
+if is_automorphic(num):
+    print(num, "is an automorphic number.")
+else:
+    print(num, "is not an automorphic number.")
+
+end_time=time.time()
+execution_time=end_time-start_time
+print("Execution time:", execution_time)
+print(sys.getsizeof(var))
+
+OUTPUT:
+Enter a number: 56
+56 is not an automorphic number.
+Execution time: 1.882096529006958
+28
+
+
+
+#Q9. Write a function is_pronic(n) that checks if a number is the product of two consecutive integers.
+
+#CODE:
+import time
+import sys
+var=1
+start_time=time.time()
+
+def is_pronic(n):
+    if n < 0:
+        return False
+    for i in range(int(n**0.5) + 1):
+        if i * (i + 1) == n:
+            return True
+    return False
+n=int(input("Enter the number:"))
+print(is_pronic(n))
+
+end_time=time.time()
+execution_time=end_time-start_time
+print("Execution time:", execution_time)
+print(sys.getsizeof(var))
+
+OUTPUT:
+Enter the number:56
+True
+Execution time: 1.2329511642456055
+28
+
+
+
+#Q10. Write a function prime_factors(n) that returns the list of prime factors of a number.
+
+#CODE:
+import time
+import sys
+var=1
+start_time=time.time()
+
+def is_automorphic(n):
+    square = n * n
+    return str(square).endswith(str(n))
+
+num = int(input("Enter a number: "))
+
+if is_automorphic(num):
+    print(num, "is an automorphic number.")
+else:
+    print(num, "is not an automorphic number.")
+
+end_time=time.time()
+execution_time=end_time-start_time
+print("Execution time:", execution_time)
+print(sys.getsizeof(var))
+
+OUTPUT:
+Enter a number: 56
+56 is not an automorphic number.
+Execution time: 1.1914525032043457
+28
