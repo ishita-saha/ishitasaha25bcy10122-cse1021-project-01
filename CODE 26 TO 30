@@ -1,0 +1,459 @@
+#Q26. Write a function Lucas Numbers Generator lucas_sequence(n) that generates the first n Lucas numbers (similar to Fibonacci but starts with 2,1).
+
+#CODE:
+import time
+import sys
+
+def lucas_sequence(n):
+    
+    if not isinstance(n, int):
+        raise TypeError("n must be an integer.")
+    if n < 0:
+        raise ValueError("n must be a non-negative integer.")
+
+    if n == 0:
+        return []
+    elif n == 1:
+        return [2]
+    elif n == 2:
+        return [2, 1]
+
+    # Initialize with the first two terms
+    lucas_nums = [2, 1]
+
+    for _ in range(2, n):
+        # The next number is the sum of the last two
+        lucas_nums.append(lucas_nums[-1] + lucas_nums[-2])
+
+    return lucas_nums
+
+if __name__ == "__main__":
+    terms = 15
+    
+    print(f"--- Lucas Sequence Generation (First {terms} terms) ---")
+
+    try:
+        start_time = time.perf_counter()
+        
+        sequence = lucas_sequence(terms)
+        
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        
+        memory_usage_bytes = sys.getsizeof(sequence)
+        
+        print("\n[Result]")
+        print(f"Lucas numbers: {sequence}")
+
+        print("\n[Performance Metrics]")
+        print(f"Terms calculated: {terms}")
+        print(f"Time taken: {elapsed_time:.6f} milliseconds")
+        print(f"Memory allocated for list object (approx.): {memory_usage_bytes} bytes")
+
+    except (TypeError, ValueError) as e:
+        print("\n[Error]")
+        print(e)
+
+#OUTPUT:
+--- Lucas Sequence Generation (First 15 terms) ---
+
+[Result]
+Lucas numbers: [2, 1, 3, 4, 7, 11, 18, 29, 47, 76, 123, 199, 322, 521, 843]
+
+[Performance Metrics]
+Terms calculated: 15
+Time taken: 0.018000 milliseconds
+Memory allocated for list object (approx.): 184 bytes
+
+
+#Q27. Write a function for Perfect Powers Check is_perfect_power(n) that checks if a number can be expressed as ab where a > 0 and b > 1.
+
+#CODE:
+import time
+import sys
+# Note: No 'math' module is imported, as requested.
+
+def integer_power(base, exponent):
+    
+    if exponent == 0:
+        return 1
+    
+    result = 1
+    for _ in range(exponent):
+        result *= base
+    return result
+
+def integer_isqrt(n):
+   
+    if n < 0:
+        raise ValueError("Cannot compute square root of negative number.")
+    if n == 0 or n == 1:
+        return n
+    
+    low = 1
+    
+    high = n // 2 + 1 
+    
+    result = 1
+    
+    while low <= high:
+        mid = (low + high) // 2
+        mid_sq = mid * mid 
+        
+        if mid_sq == n:
+            return mid
+        elif mid_sq < n:
+            result = mid # Store potential answer
+            low = mid + 1
+        else:
+            high = mid - 1
+            
+    return result
+
+def is_perfect_power(n):
+    
+    if not isinstance(n, int):
+        raise TypeError("n must be an integer.")
+    if n < 0:
+        raise ValueError("n must be a non-negative integer.")
+
+    # 1. Base Case: 1 is a perfect power
+    if n == 1:
+        return True
+
+    max_a = integer_isqrt(n)
+    
+    b = 2 # Start checking exponents b >= 2
+    
+    while True:
+        
+        low = 2
+       
+        high = max_a
+        
+        while low <= high:
+            a = (low + high) // 2
+            
+            # Calculate a^b using the custom power function
+            p = integer_power(a, b)
+            
+            if p == n:
+                # Found the solution: n = a^b
+                return True
+            elif p < n:
+                low = a + 1
+            elif p > n:
+                high = a - 1
+            
+       
+        next_min_power = 2
+        for i in range(b): # Calculate 2^b
+            next_min_power *= 2
+        
+        if next_min_power > n:
+            break
+
+        b += 1
+        
+    return False
+
+# --- Example Usage and Performance Measurement ---
+
+if __name__ == "__main__":
+    
+    
+    test_numbers = [4, 8, 9, 12, 16, 31, 64, 1, 1000000, 1000001]
+    
+    print("--- Perfect Power Checker (No built-in math functions) ---")
+    
+    print("\n[Test Results]")
+    total_time_ms = 0
+    total_memory_bytes = 0
+    
+    for num in test_numbers:
+        start_time = time.perf_counter()
+        
+        try:
+            is_pp = is_perfect_power(num)
+        except (TypeError, ValueError) as e:
+            print(f"  {num} -> Error: {e}")
+            continue
+            
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        memory_usage_bytes = sys.getsizeof(is_pp) # Size of the boolean result
+        
+        total_time_ms += elapsed_time
+        total_memory_bytes += memory_usage_bytes
+        
+        result_str = "Perfect Power" if is_pp else "Not a Perfect Power"
+        
+        print(f"  {num}: {result_str} (Time: {elapsed_time:.6f} ms)")
+
+    # Output Performance Summary
+    avg_time_ms = total_time_ms / len(test_numbers)
+    
+    print("\n[Performance Metrics Summary]")
+    print(f"Total numbers tested: {len(test_numbers)}")
+    print(f"Average time per check: {avg_time_ms:.6f} milliseconds")
+    print(f"Approximate memory for result object (per case): {total_memory_bytes / len(test_numbers):.0f} bytes (for the boolean result)")
+
+#OUTPUT:
+--- Perfect Power Checker (No built-in math functions) ---
+
+[Test Results]
+  4: Perfect Power (Time: 0.014700 ms)
+  1: Perfect Power (Time: 0.006100 ms)
+  1000000: Perfect Power (Time: 0.017400 ms)
+  1000001: Not a Perfect Power (Time: 0.414600 ms)
+
+[Performance Metrics Summary]
+Total numbers tested: 4
+Average time per check: 0.113200 milliseconds
+Approximate memory for result object (per case): 28 bytes (for the boolean result)
+
+
+#Q28. Write a function Collatz Sequence Length collatz_length(n) that returns the number of steps for n to reach 1 in the Collatz conjecture.
+#CODE:
+import time
+import sys
+
+def collatz_length(n):
+    
+    if n <= 0:
+        
+        raise ValueError("Input must be a positive integer.")
+    
+    current = n
+    steps = 0
+    
+    while current != 1:
+        
+        if current % 2 == 0:
+            # If even, divide by 2
+            current = current // 2  # Integer division is used
+        else:
+            # If odd, apply (3 * n + 1)
+            current = 3 * current + 1
+        
+        steps += 1
+        
+        if steps > 100000:
+            
+            print(f"Warning: Reached max steps (100000) for starting number {n}")
+            return -1 # Return -1 to indicate failure or max limit reached
+
+    return steps
+
+# --- Execution and Performance Measurement ---
+
+if __name__ == "__main__":
+    
+    test_numbers = [6, 100, 27]
+    
+    print("--- Collatz Sequence Length Calculation ---")
+
+    for number in test_numbers:
+        
+        start_time = time.perf_counter()
+        
+        start_mem_size = sys.getsizeof(number) 
+
+        try:
+            result_steps = collatz_length(number)
+        except ValueError as e:
+            print("-" * 50)
+            print(f"Checking N = {number}")
+            print(f"Error: {e}")
+            continue
+
+        end_time = time.perf_counter()
+        end_mem_size = sys.getsizeof(number)
+        
+        print("-" * 50)
+        print(f"Checking N = {number}")
+        
+        if result_steps != -1:
+            print(f"Steps required to reach 1: {result_steps}")
+        else:
+            print("Calculation failed or exceeded safety limit.")
+        
+        execution_time_ms = (end_time - start_time) * 1000
+        memory_used_bytes = end_mem_size - start_mem_size
+        
+        print(f"Execution Time: {execution_time_ms:.6f} milliseconds")
+        
+        print(f"Memory Overhead (sys.getsizeof difference): {memory_used_bytes} bytes")
+        
+    print("-" * 50)
+
+#OUTPUT:
+--- Collatz Sequence Length Calculation ---
+--------------------------------------------------
+Checking N = 6
+Steps required to reach 1: 8
+Execution Time: 0.015900 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+--------------------------------------------------
+Checking N = 100
+Steps required to reach 1: 25
+Execution Time: 0.050600 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+--------------------------------------------------
+Checking N = 27
+Steps required to reach 1: 111
+Execution Time: 0.025500 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+
+
+
+#Q29. Write a function Polygonal Numbers polygonal_number(s,n) that returns the n-th s-gonal number.
+#CODE:
+import time
+import tracemalloc
+
+def polygonal_number(s, n):
+    return ((s - 2) * n * n - (s - 4) * n) // 2
+s = int(input("Enter s (number of sides): "))
+n = int(input("Enter n (term number): "))
+tracemalloc.start()
+start = time.time()
+result = polygonal_number(s, n)
+current, peak = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+exec_time = time.time() - start
+
+print(f"\n{n}-th {s}-gonal number = {result}")
+print(f"Execution Time: {exec_time:.6f} seconds")
+print(f"Memory Used: {peak/1024:.2f} KB")
+
+#OUTPUT:
+Enter s (number of sides): 4
+Enter n (term number): 3
+3-th 4-gonal number = 9
+Execution Time: 0.001169 seconds
+Memory Used: 0.75 KB
+
+ 
+#Q30. Write a function Carmichael Number Check is_carmichael(n) that checks if a composite number n satisfies an−1 ≡ 1 mod n for all a coprime to n.
+#CODE:
+import time
+import sys
+
+def gcd(a, b):
+    
+    while b:
+        a, b = b, a % b
+    return a
+
+def modular_exponentiation(base, exponent, modulus):
+    
+    base %= modulus
+    result = 1
+    
+    while exponent > 0:
+        # If exponent is odd, multiply the result with the current base
+        if exponent % 2 == 1:
+            result = (result * base) % modulus
+        
+        base = (base * base) % modulus
+        
+        exponent //= 2
+        
+    return result
+
+def is_composite(n):
+    
+    if n <= 3:
+        return False
+    if n % 2 == 0 or n % 3 == 0:
+        return True
+    
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return True
+        i += 6
+        
+    return False
+
+# --- Main Carmichael Check Function ---
+
+def is_carmichael(n):
+    
+    if not isinstance(n, int) or n < 2:
+        raise ValueError("n must be an integer >= 2.")
+
+    if not is_composite(n):
+        return False
+
+    exponent = n - 1
+    
+    for a in range(2, n):
+        if gcd(a, n) == 1:
+            result = modular_exponentiation(a, exponent, n)
+            
+            if result != 1:
+                return False
+                
+    return True
+
+# --- Example Usage and Performance Measurement ---
+
+if __name__ == "__main__":
+    
+    test_numbers = [561, 6, 1729, 13]
+    
+    print("--- Carmichael Number Checker (No built-in math functions) ---")
+    
+    print("Note: Checking all coprime bases 'a' up to n can be slow for large n.")
+    
+    print("\n[Test Results]")
+    total_time_ms = 0
+    total_memory_bytes = 0
+    
+    for num in test_numbers:
+        # Start Timer
+        start_time = time.perf_counter()
+        
+        try:
+            is_carm = is_carmichael(num)
+        except ValueError as e:
+            print(f"  {num} -> Error: {e}")
+            continue
+            
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        memory_usage_bytes = sys.getsizeof(is_carm) # Size of the boolean result
+        
+        total_time_ms += elapsed_time
+        total_memory_bytes += memory_usage_bytes
+        
+        result_str = "Carmichael Number" if is_carm else "Not a Carmichael Number"
+        
+        print(f"  n = {num}: {result_str} (Time: {elapsed_time:.6f} ms)")
+
+    avg_time_ms = total_time_ms / len(test_numbers)
+    
+    print("\n[Performance Metrics Summary]")
+    print(f"Total numbers tested: {len(test_numbers)}")
+    print(f"Average time per check: {avg_time_ms:.6f} milliseconds")
+    print(f"Approximate memory for result object (per case): {total_memory_bytes / len(test_numbers):.0f} bytes")
+
+#OUTPUT:
+--- Carmichael Number Checker (No built-in math functions) ---
+Note: Checking all coprime bases 'a' up to n can be slow for large n.
+
+[Test Results]
+  n = 561: Carmichael Number (Time: 1.113100 ms)
+  n = 6: Not a Carmichael Number (Time: 0.023600 ms)
+  n = 1729: Carmichael Number (Time: 5.954200 ms)
+  n = 13: Not a Carmichael Number (Time: 0.008100 ms)
+
+[Performance Metrics Summary]
+Total numbers tested: 4
+Average time per check: 1.774750 milliseconds
+Approximate memory for result object (per case): 28 bytes
