@@ -1,0 +1,428 @@
+#Q21. Write a function Modular Multiplicative Inverse mod_inverse(a, m) that finds the number x such that (a * x) ≡ 1 mod m.
+
+#CODE:
+import time
+import sys
+# import tracemalloc # for more detailed memory snapshots
+
+def mod_inverse(a: int, m: int) -> int:
+    if not isinstance(a, int) or not isinstance(m, int):
+        raise TypeError("Both a and m must be integers.")
+    if m <= 1:
+        raise ValueError("Modulus m must be greater than 1.")
+
+    def extended_gcd(x, y):
+        if y == 0:
+            return x, 1, 0
+        gcd, x1, y1 = extended_gcd(y, x % y)
+        return gcd, y1, x1 - (x // y) * y1
+
+    gcd, x, _ = extended_gcd(a, m)
+
+    if gcd != 1:
+        raise ValueError(f"No modular inverse exists for a={a} and m={m} (gcd={gcd}).")
+
+    return x % m
+
+def run_test(a, m):
+   
+    try:
+        function_size_bytes = sys.getsizeof(mod_inverse)
+        
+        result = mod_inverse(a, m)
+        end_time = time.perf_counter()
+        
+        print(f"mod_inverse({a}, {m}) result: {result}")
+        print(f"  Time elapsed: {end_time - start_time:.6f} seconds")
+        print(f"  mod_inverse object size: {function_size_bytes} bytes (not runtime memory usage)")
+        
+    except (ValueError, TypeError) as e:
+        end_time = time.perf_counter()
+        
+        print(f"mod_inverse({a}, {m}) Error: {e}")
+        print(f"  Time elapsed: {end_time - start_time:.6f} seconds")
+
+run_test(3, 15)
+run_test(10, 18)
+
+run_test(3, 11)
+
+#OUTPUT:
+mod_inverse(3, 15) Error: No modular inverse exists for a=3 and m=15 (gcd=3).
+  Time elapsed: 0.000030 seconds
+mod_inverse(10, 18) Error: No modular inverse exists for a=10 and m=18 (gcd=2).
+  Time elapsed: 0.000024 seconds
+mod_inverse(3, 11) result: 4
+  Time elapsed: 0.000018 seconds
+  mod_inverse object size: 160 bytes (not runtime memory usage)
+
+
+
+#Q22. Write a function chinese Remainder Theorem Solver crt(remainders, moduli) that solves a system of congruences x ≡ ri mod mi.	
+
+#CODE:
+import time
+import sys
+
+# --- Helper Functions for CRT ---
+
+def extended_gcd(a, b):
+    
+    if a == 0:
+        return (b, 0, 1)
+    
+    g, x1, y1 = extended_gcd(b % a, a)
+    
+    x = y1 - (b // a) * x1
+    y = x1
+    
+    return (g, x, y)
+
+def mod_inverse(a, m):
+    
+    g, x, y = extended_gcd(a, m)
+    
+    if g != 1:
+        raise ValueError(f"Modular inverse does not exist (gcd({a}, {m}) = {g} != 1). Moduli must be pairwise coprime for this simple CRT formula.")
+    
+    return x % m
+
+# --- Main CRT Solver ---
+
+def crt(remainders, moduli):
+    
+    if len(remainders) != len(moduli):
+        raise ValueError("The number of remainders must match the number of moduli.")
+
+    N = 1
+    for m in moduli:
+        N *= m
+    
+    x = 0
+    
+    for r_i, m_i in zip(remainders, moduli):
+        M_i = N // m_i
+        
+        try:
+            y_i = mod_inverse(M_i, m_i)
+        except ValueError as e:
+            raise e 
+        
+        x += r_i * M_i * y_i
+        
+    return x % N
+
+# --- Example Usage and Performance Measurement ---
+
+if __name__ == "__main__":
+    
+    
+    R = [2, 3, 2] # Remainders (r_i)
+    M = [3, 5, 7] # Moduli (m_i)
+    
+    print("--- Chinese Remainder Theorem Solver ---")
+    print(f"System of congruences: x ≡ {R[0]} (mod {M[0]}), x ≡ {R[1]} (mod {M[1]}), x ≡ {R[2]} (mod {M[2]})")
+
+    start_time = time.perf_counter()
+    
+    try:
+        solution = crt(R, M)
+        
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        
+        memory_usage_bytes = sys.getsizeof(solution)
+        
+        print("\n[Result]")
+        print(f"The unique solution modulo N={M[0]*M[1]*M[2]} is: x = {solution}")
+        
+        # Verification
+        print("\n[Verification]")
+        is_correct = True
+        for r, m in zip(R, M):
+            if solution % m == r:
+                print(f"  {solution} ≡ {r} (mod {m}) - OK")
+            else:
+                print(f"  {solution} ≡ {solution % m} (mod {m}) - ERROR! Expected {r}")
+                is_correct = False
+
+        if is_correct:
+             print("The solution is verified to be correct.")
+        
+        print("\n[Performance Metrics]")
+        print(f"Time taken: {elapsed_time:.6f} milliseconds")
+        print(f"Memory allocated for solution (approx.): {memory_usage_bytes} bytes")
+
+    except ValueError as e:
+        print(f"\n[Error]")
+        print(e)
+        print("Please ensure all moduli are pairwise coprime (i.e., gcd(m_i, m_j) = 1 for i != j).")
+
+
+#OUTPUT:
+--- Chinese Remainder Theorem Solver ---
+System of congruences: x ≡ 2 (mod 3), x ≡ 3 (mod 5), x ≡ 2 (mod 7)
+
+[Result]
+The unique solution modulo N=105 is: x = 23
+
+[Verification]
+  23 ≡ 2 (mod 3) - OK
+  23 ≡ 3 (mod 5) - OK
+  23 ≡ 2 (mod 7) - OK
+The solution is verified to be correct.
+
+[Performance Metrics]
+Time taken: 0.022200 milliseconds
+Memory allocated for solution (approx.): 28 bytes
+
+
+#Q23. Write a function Quadratic Residue. Check is_quadratic_residue(a, p) that checks if x2 ≡ a mod p
+has a solution.
+
+#CODE:
+import time
+import sys
+
+def is_quadratic_residue(a, p):
+    
+    if not isinstance(p, int) or p <= 0:
+        raise ValueError("Modulus 'p' must be a positive integer (ideally a prime for this context).")
+        
+    
+    if a % p == 0:
+        return True
+
+    
+    if p == 2:
+        return True # Since a % p != 0 case is handled above, a must be 1 (mod 2) here.
+
+        
+    exponent = (p - 1) // 2
+    
+    legendre_symbol_value = pow(a, exponent, p)
+    
+        if legendre_symbol_value == 1:
+        return True
+    
+    elif legendre_symbol_value == p - 1:
+        return False
+    
+    
+    else:
+        return False 
+
+# --- Example Usage and Performance Measurement ---
+
+if __name__ == "__main__":
+    
+    P = 7
+    
+    test_cases = [
+        (1, P),  # 1^2 ≡ 1 (mod 7) -> Residue (True)
+        (2, P),  # 3^2 ≡ 2 (mod 7) -> Residue (True)
+        (3, P),  # 3 is not a residue (False)
+        (4, P),  # 2^2 ≡ 4 (mod 7) -> Residue (True)
+        (5, P),  # 5 is not a residue (False)
+        (6, P),  # 6 is not a residue (False)
+        (0, P),  # Trivial case: 0 ≡ 0 (mod 7) -> Residue (True)
+    ]
+    
+    print("--- Quadratic Residue Checker (using Euler's Criterion) ---")
+    print(f"Checking residues modulo P = {P}")
+    
+    print("\n[Test Results]")
+    total_time_ms = 0
+    total_memory_bytes = 0
+    
+    for a, p in test_cases:
+        start_time = time.perf_counter()
+        
+        is_residue = is_quadratic_residue(a, p)
+        
+        end_time = time.perf_counter()
+        
+        elapsed_time = (end_time - start_time) * 1000  # in milliseconds
+        memory_usage_bytes = sys.getsizeof(is_residue) # Size of the boolean result
+        
+        total_time_ms += elapsed_time
+        total_memory_bytes += memory_usage_bytes
+        
+        result_str = "Residue" if is_residue else "Non-Residue"
+        
+        print(f"  x^2 ≡ {a} (mod {p}) is {result_str} (Time: {elapsed_time:.4f} ms)")
+
+    # Output Performance Summary
+    avg_time_ms = total_time_ms / len(test_cases)
+    
+    print("\n[Performance Metrics Summary]")
+    print(f"Total test cases run: {len(test_cases)}")
+    print(f"Average time per check: {avg_time_ms:.6f} milliseconds")
+    print(f"Approximate memory for result object (per case): {total_memory_bytes / len(test_cases):.0f} bytes (for the boolean result)")
+
+
+#OUTPUT:
+--- Quadratic Residue Checker (using Euler's Criterion) ---
+Checking residues modulo P = 7
+
+[Test Results]
+  x^2 ≡ 1 (mod 7) is Residue (Time: 0.0089 ms)
+  x^2 ≡ 2 (mod 7) is Residue (Time: 0.0113 ms)
+  x^2 ≡ 3 (mod 7) is Non-Residue (Time: 0.0073 ms)
+  x^2 ≡ 4 (mod 7) is Residue (Time: 0.0081 ms)
+  x^2 ≡ 5 (mod 7) is Non-Residue (Time: 0.0083 ms)
+  x^2 ≡ 6 (mod 7) is Non-Residue (Time: 0.0108 ms)
+  x^2 ≡ 0 (mod 7) is Residue (Time: 0.0045 ms)
+
+[Performance Metrics Summary]
+Total test cases run: 7
+Average time per check: 0.008457 milliseconds
+Approximate memory for result object (per case): 28 bytes (for the boolean result)
+
+
+
+#Q24. Write a function order_mod(a, n) that finds the smallest Positive integer k such that ak ≡ 1 mod n.
+
+#CODE:
+import time
+import tracemalloc
+
+def gcd(x, y):
+    while y:
+        x, y = y, x % y
+    return x
+
+def order_mod(a, n):
+    if gcd(a, n) != 1:
+        return None
+
+    tracemalloc.start()
+    start = time.time()
+
+    k = 1
+    value = a % n
+
+    while value != 1:
+        value = (value * a) % n
+        k += 1
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    exec_time = time.time() - start
+    mem_used = peak / 1024  
+
+    print(f"Execution Time: {exec_time:.6f} seconds")
+    print(f"Memory Used: {mem_used:.2f} KB")
+
+    return k
+
+a = int(input("Enter a: "))
+n = int(input("Enter n: "))
+
+result = order_mod(a, n)
+
+if result is None:
+    print("Order does not exist because a and n are not coprime.")
+else:
+    print(f"Order of {a} mod {n} is {result}.")
+
+OUTPUT:
+mod_inverse(3, 15) Error: No modular inverse exists for a=3 and m=15 (gcd=3).
+  Time elapsed: 0.000030 seconds
+mod_inverse(10, 18) Error: No modular inverse exists for a=10 and m=18 (gcd=2).
+  Time elapsed: 0.000024 seconds
+mod_inverse(3, 11) result: 4
+  Time elapsed: 0.000018 seconds
+  mod_inverse object size: 160 bytes (not runtime memory usage)
+ 
+
+
+#Q25. Write a function Fibonacci Prime Check is_fibonacci_prime(n) that checks if a number is both Fibonacci and prime.
+
+#CODE:
+import time
+import sys
+
+# --- Core Logic Functions (No built-in functions/modules used) ---
+
+def is_prime(n):
+    
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+        
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+        
+    return True
+
+def is_fibonacci(n):
+    
+    if n < 0:
+        return False
+    
+    a, b = 0, 1
+    
+    if n == 0 or n == 1:
+        return True
+        
+    while b < n:
+        a, b = b, a + b
+        
+    return b == n
+
+def is_fibonacci_prime(n):
+        return is_fibonacci(n) and is_prime(n)
+
+# --- Execution and Performance Measurement ---
+
+if __name__ == "__main__":
+    
+    test_numbers = [1, 2, 3, 5,1597]
+    
+    for number in test_numbers:
+        
+        start_time = time.perf_counter()
+        
+        
+        start_mem_size = sys.getsizeof(number) 
+
+        result = is_fibonacci_prime(number)
+
+        end_time = time.perf_counter()
+        end_mem_size = sys.getsizeof(number)
+        
+        status = "is" if result else "is NOT"
+        
+        print("-" * 50)
+        print(f"Checking N = {number}")
+        print(f"Result: {number} {status} a Fibonacci Prime.")
+        
+        execution_time_ms = (end_time - start_time) * 1000
+        memory_used_bytes = end_mem_size - start_mem_size
+        
+        print(f"Execution Time: {execution_time_ms:.6f} milliseconds")
+        print(f"Memory Overhead (sys.getsizeof difference): {memory_used_bytes} bytes")
+
+#OUTPUT:
+Checking N = 1
+Result: 1 is NOT a Fibonacci Prime.
+Execution Time: 0.010300 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+--------------------------------------------------
+Checking N = 2
+Result: 2 is a Fibonacci Prime.
+Execution Time: 0.021500 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
+--------------------------------------------------
+Checking N = 1597
+Result: 1597 is a Fibonacci Prime.
+Execution Time: 0.014300 milliseconds
+Memory Overhead (sys.getsizeof difference): 0 bytes
