@@ -1,0 +1,40 @@
+#Q11. Write a function count_distinct_prime_factors(n) that returns how many unique prime factors a number has.
+
+#CODE:
+import time
+import sys
+import math
+
+def distinct_prime_factors(n):
+    factors = set()
+    i = 2
+    while i * i <= n:
+        while n % i == 0:
+            factors.add(i)
+            n //= i
+        i += 1
+    if n > 1:
+        factors.add(n)
+    return factors
+
+number = int(input("Enter a number: "))
+
+start_time = time.time()
+factors = distinct_prime_factors(number)
+end_time = time.time()
+
+print(f"\nThe number {number} has {len(factors)} distinct prime factors: {factors}")
+print(f"Execution time: {end_time - start_time:.6f} seconds")
+print(f"Memory utilization: {sys.getsizeof(factors)} bytes")
+
+#OUTPUT
+Enter a number: 16
+
+The number 16 has 1 distinct prime factors: {2}
+Execution time: 0.000012 seconds
+Memory utilization: 216 bytes
+
+
+#Q12. Write a function is_prime_power(n) that checks if a number can be expressed as pk where p is prime and k ≥ 1.
+
+#CODE
