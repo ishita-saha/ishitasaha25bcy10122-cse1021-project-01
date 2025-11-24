@@ -38,3 +38,331 @@ Memory utilization: 216 bytes
 #Q12. Write a function is_prime_power(n) that checks if a number can be expressed as pk where p is prime and k ≥ 1.
 
 #CODE
+import time
+import sys
+
+def is_prime_power(n):
+
+    if n <= 1:
+        return False
+    
+    temp_n = n
+    prime_factor = -1
+    
+    if temp_n % 2 == 0:
+        prime_factor = 2
+        # Divide out all factors of 2
+        while temp_n % 2 == 0:
+            temp_n //= 2
+            
+    i = 3
+    while i * i <= temp_n:
+        if temp_n % i == 0:
+            
+            if prime_factor != -1:
+                return False
+            
+            prime_factor = i
+            
+            while temp_n % i == 0:
+                temp_n //= i
+                
+        i += 2
+        
+    if temp_n > 1:
+        if prime_factor != -1 and prime_factor != temp_n:
+            return False
+        
+        prime_factor = temp_n
+        
+    return prime_factor != -1
+
+# --- Execution and Output Section ---
+
+test_numbers = [27, 12, 16, 7, 30, 1]
+print(f"**Checking Prime Power Status for Numbers:** {test_numbers}\n")
+
+for n in test_numbers:
+    start_time = time.time()
+    
+    result = is_prime_power(n)
+    
+    end_time = time.time()
+    
+    execution_time = end_time - start_time
+    memory_usage = sys.getsizeof(result) 
+    
+    print(f"--- Input: {n} ---")
+    print(f"Output: {result}")
+    
+    print(f"Execution Time: {execution_time * 1000:.4f} milliseconds")
+    print(f"Memory Utilisation (Result Object): {memory_usage} bytes")
+    print("-" * 20)
+
+OUTPUT:
+**Checking Prime Power Status for Numbers:** [27, 12, 16, 7, 30, 1]
+
+--- Input: 27 ---
+Output: True
+Execution Time: 0.0143 milliseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------
+--- Input: 12 ---
+Output: False
+Execution Time: 0.0064 milliseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------
+--- Input: 16 ---
+Output: True
+Execution Time: 0.0055 milliseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------
+--- Input: 7 ---
+Output: True
+Execution Time: 0.0050 milliseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------
+--- Input: 30 ---
+Output: False
+Execution Time: 0.0050 milliseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------
+--- Input: 1 ---
+Output: False
+Execution Time: 0.0031 milliseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------
+
+
+
+
+
+
+
+
+#Q13. Write a function is_mersenne_prime(p) that checks if 2p - 1 is a prime number (given that p is prime).
+
+#CODE:
+import time
+import sys
+
+def is_prime_power_base(n):
+    
+    if n <= 1:
+        return False
+    if n == 2 or n == 3:
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    
+    # Check factors from 5 up to sqrt(n)
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+def is_mersenne_prime(p):
+    
+    
+    if not is_prime_power_base(p):
+        print(f"Error: Input p={p} must be a prime number.")
+        return False
+        
+    if p == 2:
+        # M_2 = 2^2 - 1 = 3 (Prime)
+        return True
+    
+    
+  
+    M = 1
+    i = 0
+    while i < p:
+        M = M + M  # Equivalent to M * 2
+        i += 1
+    M = M - 1 # M = 2^p - 1
+
+    s = 4
+    
+    
+    k = 0
+    while k < p - 2:
+        
+        s_squared = s * s
+        
+        s_next = s_squared - 2
+        
+        
+        
+        while s_next >= M:
+            s_next = s_next - M
+        
+        s = s_next
+        k += 1
+        
+    # M_p is prime if and only if s_{p-2} = 0
+    return s == 0
+
+# --- Execution and Output Section ---
+
+test_primes = [3, 5, 7, 11] # M3=7, M5=31, M7=127 (Prime); M11=2047=23*89 (Composite)
+print("🔍 **Checking Mersenne Prime Status (2^p - 1) for various prime 'p':**\n")
+
+for p in test_primes:
+    start_time = time.time()
+    
+    result = is_mersenne_prime(p)
+    
+    end_time = time.time()
+    
+    execution_time = end_time - start_time
+    memory_usage = sys.getsizeof(result) 
+    
+    if is_prime_power_base(p):
+        M_p = (1 << p) - 1 # Use bit shift for 2^p, then subtract 1
+    else:
+        M_p = "N/A (p not prime)"
+        
+    print(f"--- Input p: {p} (M_p = {M_p}) ---")
+    print(f"Output (M_p is prime?): **{result}**")
+    
+    print(f"Execution Time: {execution_time * 1000000:.2f} microseconds")
+    print(f"Memory Utilisation (Result Object): {memory_usage} bytes")
+    print("-" * 50)
+
+OUTPUT:
+🔍 **Checking Mersenne Prime Status (2^p - 1) for various prime 'p':**
+
+--- Input p: 3 (M_p = 7) ---
+Output (M_p is prime?): **True**
+Execution Time: 9.30 microseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------------------------------------
+--- Input p: 5 (M_p = 31) ---
+Output (M_p is prime?): **True**
+Execution Time: 9.30 microseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------------------------------------
+--- Input p: 7 (M_p = 127) ---
+Output (M_p is prime?): **True**
+Execution Time: 10.73 microseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------------------------------------
+--- Input p: 11 (M_p = 2047) ---
+Output (M_p is prime?): **False**
+Execution Time: 71.76 microseconds
+Memory Utilisation (Result Object): 28 bytes
+--------------------------------------------------
+
+
+
+#Q14. Write a function twin_primes(limit) that generates all twin prime pairs up to a given limit.
+
+#CODE:
+import time
+import sys
+
+var=1
+
+start_time=time.time()
+
+def is_prime(n):
+    
+    if n <= 1:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+
+    i = 3
+    
+    while i * i <= n:
+        if n % i == 0:
+            return False
+        i = i + 2
+    return True
+
+def twin_primes(limit):
+    
+    twin_pairs = []
+    
+    
+    p = 3
+    while p <= limit - 2:
+        
+        if is_prime(p):
+            p_plus_2 = p + 2
+            
+            if is_prime(p_plus_2):
+                twin_pairs.append((p, p_plus_2))
+        
+        
+        p = p + 2
+        
+    return twin_pairs
+
+# --- Example Usage ---
+
+limit_value = 100
+result = twin_primes(limit_value)
+
+print(f"Twin prime pairs up to {limit_value}:")
+
+
+
+print(result)
+
+
+end_time=time.time()
+execution_time=end_time-start_time
+print("Execution time:", execution_time)
+print(sys.getsizeof(var))
+[(3, 5), (5, 7), (11, 13), (17, 19), (29, 31), (41, 43), (59, 61), (71, 73)]
+
+#OUTPUT:
+Twin prime pairs up to 100:
+[(3, 5), (5, 7), (11, 13), (17, 19), (29, 31), (41, 43), (59, 61), (71, 73)]
+Execution time: 0.015970468521118164
+28
+
+
+
+#Q15. Write a function Number of Divisors (d(n)) count_divisors(n) that returns how many positive divisors a number has.
+
+#CODE:
+import time
+import tracemalloc
+
+def count_divisors(n):
+    count = 0
+    i = 1
+    while i * i <= n:
+        if n % i == 0:
+            if i * i == n:
+                count += 1
+            else:
+                count += 2
+        i += 1
+    return count
+num = int(input("Enter a number: "))
+tracemalloc.start()
+start_time = time.time()
+result = count_divisors(num)
+end_time = time.time()
+current, peak = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+print(f"Number of divisors of {num}: {result}")
+print(f"Execution time: {end_time - start_time:.8f} seconds")
+print(f"Current memory usage: {current / 1024:.4f} KB")
+print(f"Peak memory usage: {peak / 1024:.4f} KB")
+
+
+OUTPUT:
+Enter a number: 56
+Number of divisors of 56: 8
+Execution time: 0.00180840 seconds
+Current memory usage: 0.7500 KB
+Peak memory usage: 0.7500 KB
+
